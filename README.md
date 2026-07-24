@@ -1,57 +1,92 @@
-# PrintControl — Sistema de Registro de Impressoras
+# 🖨️ Sistema de Gestão e Controle de Impressoras — Laticínios Carolina
 
-Backend em **Java (Spring Boot)** + frontend web com design próprio. Os dados ficam salvos em um banco de dados local (H2, arquivo em disco), então nada se perde ao reiniciar.
+Sistema corporativo para controle centralizado de inventário, monitoramento de rede e gestão do parque de impressoras da **Laticínios Carolina**.
 
-## Como rodar
+---
 
-Pré-requisitos: **Java 17+** e **Maven** instalados.
+## 🎯 Finalidade do Projeto
 
-```bash
-cd printer-app
-mvn spring-boot:run
+O **PrinterGen** foi desenvolvido com o objetivo de centralizar, organizar e automatizar o controle de todos os equipamentos de impressão distribuídos entre as diferentes plantas e setores da **Laticínios Carolina**.
+
+### Principais Objetivos:
+- **Monitoramento Ativo de Conectividade:** Identificar instantaneamente quais impressoras de rede estão ativas (`IP Online`) ou sem comunicação (`IP Offline`).
+- **Gestão de Inventário e Status Operacional:** Acompanhar o estado físico de cada equipamento (`Normal`, `Quebrada`, `Manutenção` e `Backup`), facilitando a tomada de decisão para substituições e reparos.
+- **Rastreabilidade e Localização:** Mapear a movimentação e alocação física dos equipamentos por setor (`Localização Antiga → Setor Novo`).
+- **Geração de Etiquetas QR:** Facilitar a identificação rápida em campo através de etiquetas padronizadas para colagem direta nos equipamentos.
+- **Relatórios Executivos:** Exportar dados consolidados em planilhas Excel para auditoria interna e tomadas de decisão da equipe de TI.
+- **Histórico de Auditoria:** Registrar de forma transparente todas as inserções, alterações de status e exclusões realizadas pelos operadores do sistema.
+
+---
+
+## 🚀 Recursos e Funcionalidades
+
+### 💻 1. Controle de Equipamentos
+- **Cadastro Detalhado:** Registro de código do equipamento, modelo, endereço IP, endereço MAC, tipo de conexão (**Ethernet** ou **USB**) e mapeamento de setores.
+- **Status Operacionais:** Classificação entre impressoras em uso normal, sob manutenção, quebradas ou em estoque de reserva (*Backup*).
+- **Filtros e Busca Rápida:** Filtros dinâmicos por status de conectividade/operação e busca em tempo real por qualquer atributo do equipamento.
+
+### 🌐 2. Verificação de Conectividade IP
+- **Teste de Comunicação Nativo:** Varredura via pacotes ICMP (Ping nativo com validação de TTL) para evitar falsos positivos na rede interna.
+- **Verificação Instantânea ("Verificar Agora"):** Atualização sob demanda no cadastro da impressora com salvamento automático e feedback visual imediato.
+- **Varredura Geral:** Botão para checagem em lote de todas as impressoras cadastradas.
+
+### 🏷️ 3. Emissão de Etiquetas de Campo
+- **Gerador de Tags:** Modal estilizado com resumo técnico do equipamento.
+- **Impressão Otimizada:** Layout de impressão em página única com regras estritas para evitar desperdício de papel.
+
+### 📊 4. Relatórios e Exportação de Dados
+- **Painel de Relatório:** Tabela completa comparativa com informações de conectividade, modelo, setor e data/hora do último teste.
+- **Exportação Excel (`.xlsx`):** Geração automática de relatórios em planilha via Apache POI.
+
+### 🔒 5. Segurança e Auditoria
+- **Controle de Acesso:** Sistema de autenticação de usuários com proteção contra tentativas seguidas de login (anti-brute force).
+- **Auditoria Interna de Alterações:** Geração automática do log `Log/modificacoes_impressoras.txt` gravando quem alterou qual impressora, com data e hora.
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+### **Backend**
+- **Java 17** / **Spring Boot 3**
+- **Spring Data JPA** & **Hibernate** (Persistência e ORM)
+- **Spring Security** (Autenticação, autorização e gerenciamento de sessões)
+- **H2 Database / JPA** (Armazenamento de dados)
+- **Apache POI** (Geração de relatórios em Excel)
+
+### **Frontend**
+- **HTML5 & CSS3 Vanilla** (Tema escuro corporativo personalizado para a **Laticínios Carolina**)
+- **JavaScript (ES6+)** (Arquitetura SPA assíncrona com `fetch` API)
+- **Tabler Icons** (Conjunto de ícones vetoriais da interface)
+
+---
+
+## 📁 Estrutura do Projeto
+
+```text
+PrinterGen/
+│
+├── Log/                               # Histórico automático de alterações (auditoria)
+│   └── modificacoes_impressoras.txt
+│
+├── src/
+│   ├── main/
+│   │   ├── java/com/printers/control/
+│   │   │   ├── config/                # Segurança e inicialização
+│   │   │   ├── controller/            # Endpoints REST da API
+│   │   │   ├── model/                 # Entidades de banco de dados
+│   │   │   ├── repository/            # Camada de dados Spring Data JPA
+│   │   │   └── service/               # Serviços de conectividade, relatórios e auditoria
+│   │   │
+│   │   └── resources/
+│   │       ├── application.properties # Configurações gerais
+│   │       └── static/                # Interface web (HTML, CSS e JS)
+│
+├── .gitignore                         # Arquivos desconsiderados no versionamento
+├── pom.xml                            # Configurações e dependências Maven
+└── README.md                          # Documentação do projeto
 ```
 
-Depois acesse: **http://localhost:8080**
+---
 
-A primeira execução cria automaticamente o arquivo do banco de dados na pasta `data/`.
-
-## Como usar
-
-- **Nova impressora**: clique no botão no topo. Só o código é obrigatório — o resto (problema, setor, marca/modelo) é opcional.
-- **Editar**: clique em qualquer card para abrir, mudar o status (Funcionando / Quebrada / Manutenção) ou os dados, e salvar.
-- **Excluir**: dentro do card aberto, botão "Excluir".
-- **Buscar/filtrar**: barra de busca e os chips no topo (Todas / Funcionando / Quebradas / Manutenção).
-- As impressoras quebradas aparecem com a borda e o selo em vermelho; em manutenção, amarelo; funcionando, verde.
-
-## Estrutura do projeto
-
-```
-printer-app/
-├── pom.xml
-├── src/main/java/com/printers/control/
-│   ├── PrinterControlApplication.java   (ponto de entrada)
-│   ├── model/Printer.java               (entidade JPA)
-│   ├── repository/PrinterRepository.java
-│   ├── service/PrinterService.java
-│   └── controller/PrinterController.java (API REST em /api/printers)
-└── src/main/resources/
-    ├── application.properties
-    └── static/ (index.html, style.css, app.js — frontend)
-```
-
-## API REST
-
-| Método | Rota                 | Descrição                  |
-|--------|-----------------------|-----------------------------|
-| GET    | /api/printers          | Lista todas                |
-| GET    | /api/printers/{id}     | Busca uma                  |
-| POST   | /api/printers          | Cria nova                  |
-| PUT    | /api/printers/{id}     | Atualiza                   |
-| DELETE | /api/printers/{id}     | Exclui                     |
-
-## Gerar um .jar executável
-
-```bash
-mvn clean package
-java -jar target/printer-control-1.0.0.jar
-```
+## 👤 Autoria e Responsabilidade
+Projeto desenvolvido por Lucas Zansavio Pereira para atendimento exclusivo às demandas de TI e infraestrutura da Laticínios Carolina.
