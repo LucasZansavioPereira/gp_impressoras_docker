@@ -1,8 +1,4 @@
 ================================================================================
-LOG DE MODIFICAÃ‡Ã•ES DE IMPRESSORAS - CONTROL DE IMPRESSORAS
-Arquivo gerado automaticamente. Registra todas as alteraÃ§Ãµes feitas por usuários.
+LOG DE MODIFICAÃƒâ€¡Ãƒâ€¢ES DE IMPRESSORAS - CONTROL DE IMPRESSORAS
+Arquivo gerado automaticamente. Registra todas as alteraÃƒÂ§ÃƒÂµes feitas por usuÃ¡rios.
 ================================================================================
-
-
-[24/07/2026 08:22:22] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Expedição C. F. Antiga' editada | Alterações: Nenhum campo alterado.
-[24/07/2026 08:24:24] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Almoxarifado de Materiais' editada | Alterações: Nenhum campo alterado.
