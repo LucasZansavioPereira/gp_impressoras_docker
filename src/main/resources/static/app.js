@@ -986,15 +986,21 @@ function closeQrModal() {
 
   updateCountdownDisplay();
 
-  // Relógio de contagem regressiva ao vivo a cada 1 segundo sincronizado com o Servidor Central
+  // Relógio de contagem regressiva ao vivo a cada 1 segundo
   setInterval(() => {
     if (!loggedUsername || appElement.classList.contains('hidden')) return;
     updateCountdownDisplay();
   }, 1000);
+
+  // Sincroniza silenciosamente a cada 10s para manter todos os computadores da empresa com os mesmos dados do servidor
+  setInterval(() => {
+    if (loggedUsername && !appElement.classList.contains('hidden')) {
+      fetchPrinters();
+    }
+  }, 10000);
 }
 
 const AUTO_CHECK_INTERVAL_MS = 10 * 60 * 1000;
-let isAutoChecking = false;
 
 function getLatestCheckTimestamp() {
   let maxTs = 0;
@@ -1030,13 +1036,6 @@ function updateCountdownDisplay() {
   const m = Math.floor(totalSec / 60).toString().padStart(2, '0');
   const s = (totalSec % 60).toString().padStart(2, '0');
   el.textContent = `${m}:${s}`;
-
-  if (totalSec <= 0 && !isAutoChecking && loggedUsername && !appElement.classList.contains('hidden')) {
-    isAutoChecking = true;
-    checkAllIps().finally(() => {
-      isAutoChecking = false;
-    });
-  }
 }
 
 window.addEventListener('DOMContentLoaded', init);
