@@ -610,6 +610,7 @@ function exportToExcel() {
 }
 
 async function checkAllIps(btn = null) {
+  resetUpdateTimer();
   const comIp = printers.filter(p => p.connectionType !== 'USB' && p.ip && p.ip.trim()).length;
 
   if (comIp === 0) {
@@ -983,18 +984,35 @@ function closeQrModal() {
     appElement.classList.add('hidden');
   }
 
-  // Dispara a verificação automática sozinho: primeira vez 5s após abrir e depois sozinho a cada 10 minutos sem precisar apertar nada
-  setTimeout(() => {
-    if (loggedUsername && !appElement.classList.contains('hidden')) {
-      checkAllIps();
-    }
-  }, 5000);
+  updateCountdownDisplay();
 
+  // Relógio de contagem regressiva ao vivo a cada 1 segundo (10:00 -> 00:00)
   setInterval(() => {
-    if (loggedUsername && !appElement.classList.contains('hidden')) {
+    if (!loggedUsername || appElement.classList.contains('hidden')) return;
+
+    updateCountdownSeconds--;
+    if (updateCountdownSeconds <= 0) {
+      resetUpdateTimer();
       checkAllIps();
+    } else {
+      updateCountdownDisplay();
     }
-  }, 10 * 60 * 1000);
+  }, 1000);
+}
+
+let updateCountdownSeconds = 10 * 60;
+
+function resetUpdateTimer() {
+  updateCountdownSeconds = 10 * 60;
+  updateCountdownDisplay();
+}
+
+function updateCountdownDisplay() {
+  const el = document.getElementById('updateCountdown');
+  if (!el) return;
+  const m = Math.floor(updateCountdownSeconds / 60).toString().padStart(2, '0');
+  const s = (updateCountdownSeconds % 60).toString().padStart(2, '0');
+  el.textContent = `${m}:${s}`;
 }
 
 window.addEventListener('DOMContentLoaded', init);
