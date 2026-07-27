@@ -46,11 +46,12 @@ public class PrinterConnectivityService {
     }
 
     /**
-     * Executa automaticamente a cada 10 minutos, percorrendo todas as
-     * impressoras cadastradas e atualizando o status de conectividade de cada uma.
+     * Executa automaticamente a cada 10 minutos (com verificação inicial após 10s da inicialização),
+     * percorrendo todas as impressoras cadastradas e atualizando o status de conectividade de cada uma.
      */
-    @Scheduled(fixedRate = 10 * 60 * 1000)
+    @Scheduled(initialDelay = 10000, fixedRate = 10 * 60 * 1000)
     public void verificarAutomaticamente() {
+        log.info("Executando verificação automática agendada de conectividade das impressoras...");
         verificarTodasImpressoras();
     }
 

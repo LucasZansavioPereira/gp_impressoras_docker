@@ -609,17 +609,20 @@ function exportToExcel() {
   showToast('Planilha exportada com sucesso');
 }
 
-async function checkAllIps(btn) {
-  const comIp = printers.filter(p => p.ip && p.ip.trim()).length;
+async function checkAllIps(btn = null) {
+  const comIp = printers.filter(p => p.connectionType !== 'USB' && p.ip && p.ip.trim()).length;
 
   if (comIp === 0) {
-    showToast('Nenhuma impressora com IP cadastrado para verificar');
+    if (btn) showToast('Nenhuma impressora com IP cadastrado para verificar');
     return;
   }
 
-  const originalHtml = btn.innerHTML;
-  btn.disabled = true;
-  btn.innerHTML = `<i class="ti ti-loader-2 spin"></i>Verificando ${comIp} impressora(s)...`;
+  let originalHtml = '';
+  if (btn) {
+    originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = `<i class="ti ti-loader-2 spin"></i>Verificando ${comIp} impressora(s)...`;
+  }
 
   try {
     const res = await fetch(`${API}/verificar-conectividade`, { method: 'POST' });
@@ -628,14 +631,18 @@ async function checkAllIps(btn) {
     render();
     renderReport();
 
-    const online = printers.filter(p => p.ip && p.connectivityStatus === 'ONLINE').length;
-    const offline = printers.filter(p => p.ip && p.connectivityStatus === 'INDISPONIVEL').length;
-    showToast(`Verificação concluída: 🟢 ${online} online, 🔴 ${offline} indisponível(is)`);
+    const online = printers.filter(p => p.connectionType !== 'USB' && p.ip && p.connectivityStatus === 'ONLINE').length;
+    const offline = printers.filter(p => p.connectionType !== 'USB' && p.ip && p.connectivityStatus === 'INDISPONIVEL').length;
+    if (btn) {
+      showToast(`Verificação concluída: 🟢 ${online} online, 🔴 ${offline} indisponível(is)`);
+    }
   } catch (e) {
-    showToast('Erro ao verificar conectividade das impressoras');
+    if (btn) showToast('Erro ao verificar conectividade das impressoras');
   } finally {
-    btn.disabled = false;
-    btn.innerHTML = originalHtml;
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
   }
 }
 
@@ -975,6 +982,19 @@ function closeQrModal() {
     userScreen.style.display = 'none';
     appElement.classList.add('hidden');
   }
+
+  // Dispara a verificação automática sozinho: primeira vez 5s após abrir e depois sozinho a cada 10 minutos sem precisar apertar nada
+  setTimeout(() => {
+    if (loggedUsername && !appElement.classList.contains('hidden')) {
+      checkAllIps();
+    }
+  }, 5000);
+
+  setInterval(() => {
+    if (loggedUsername && !appElement.classList.contains('hidden')) {
+      checkAllIps();
+    }
+  }, 10 * 60 * 1000);
 }
 
 window.addEventListener('DOMContentLoaded', init);
