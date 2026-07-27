@@ -610,7 +610,6 @@ function exportToExcel() {
 }
 
 async function checkAllIps(btn = null) {
-  resetUpdateTimer();
   const comIp = printers.filter(p => p.connectionType !== 'USB' && p.ip && p.ip.trim()).length;
 
   if (comIp === 0) {
@@ -631,6 +630,7 @@ async function checkAllIps(btn = null) {
     printers = await res.json();
     render();
     renderReport();
+    updateCountdownDisplay();
 
     const online = printers.filter(p => p.connectionType !== 'USB' && p.ip && p.connectivityStatus === 'ONLINE').length;
     const offline = printers.filter(p => p.connectionType !== 'USB' && p.ip && p.connectivityStatus === 'INDISPONIVEL').length;
@@ -986,33 +986,57 @@ function closeQrModal() {
 
   updateCountdownDisplay();
 
-  // Relógio de contagem regressiva ao vivo a cada 1 segundo (10:00 -> 00:00)
+  // Relógio de contagem regressiva ao vivo a cada 1 segundo sincronizado com o Servidor Central
   setInterval(() => {
     if (!loggedUsername || appElement.classList.contains('hidden')) return;
-
-    updateCountdownSeconds--;
-    if (updateCountdownSeconds <= 0) {
-      resetUpdateTimer();
-      checkAllIps();
-    } else {
-      updateCountdownDisplay();
-    }
+    updateCountdownDisplay();
   }, 1000);
 }
 
-let updateCountdownSeconds = 10 * 60;
+const AUTO_CHECK_INTERVAL_MS = 10 * 60 * 1000;
+let isAutoChecking = false;
 
-function resetUpdateTimer() {
-  updateCountdownSeconds = 10 * 60;
-  updateCountdownDisplay();
+function getLatestCheckTimestamp() {
+  let maxTs = 0;
+  printers.forEach(p => {
+    if (p.connectionType !== 'USB' && p.lastConnectivityCheck) {
+      const ts = new Date(p.lastConnectivityCheck).getTime();
+      if (ts > maxTs) maxTs = ts;
+    }
+  });
+  return maxTs;
 }
 
 function updateCountdownDisplay() {
   const el = document.getElementById('updateCountdown');
   if (!el) return;
-  const m = Math.floor(updateCountdownSeconds / 60).toString().padStart(2, '0');
-  const s = (updateCountdownSeconds % 60).toString().padStart(2, '0');
+
+  const latestTs = getLatestCheckTimestamp();
+  const now = Date.now();
+
+  let remainingMs = 0;
+  if (latestTs > 0) {
+    const elapsed = now - latestTs;
+    if (elapsed < AUTO_CHECK_INTERVAL_MS) {
+      remainingMs = AUTO_CHECK_INTERVAL_MS - elapsed;
+    } else {
+      remainingMs = 0;
+    }
+  } else {
+    remainingMs = AUTO_CHECK_INTERVAL_MS;
+  }
+
+  const totalSec = Math.max(0, Math.floor(remainingMs / 1000));
+  const m = Math.floor(totalSec / 60).toString().padStart(2, '0');
+  const s = (totalSec % 60).toString().padStart(2, '0');
   el.textContent = `${m}:${s}`;
+
+  if (totalSec <= 0 && !isAutoChecking && loggedUsername && !appElement.classList.contains('hidden')) {
+    isAutoChecking = true;
+    checkAllIps().finally(() => {
+      isAutoChecking = false;
+    });
+  }
 }
 
 window.addEventListener('DOMContentLoaded', init);
