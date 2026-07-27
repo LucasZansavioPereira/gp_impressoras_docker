@@ -89,4 +89,8 @@ PrinterGen/
 ---
 
 ## 👤 Autoria e Responsabilidade
+<<<<<<< HEAD
 Projeto desenvolvido por Lucas Zansavio Pereira para atendimento exclusivo às demandas de TI e infraestrutura da Laticínios Carolina.
+=======
+Projeto desenvolvido por Lucas Zansavio Pereira para atendimento exclusivo às demandas de TI e infraestrutura da Laticínios Carolina.
+>>>>>>> 742a475a0e38884c7e0db13ab7f575e637922213

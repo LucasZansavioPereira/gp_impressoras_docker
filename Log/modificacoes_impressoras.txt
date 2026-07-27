@@ -1,5 +1,8 @@
 ================================================================================
-LOG DE MODIFICAÇÕES DE IMPRESSORAS - CONTROL DE IMPRESSORAS
-Arquivo gerado automaticamente. Registra todas as alterações feitas por usu�rios.
+LOG DE MODIFICAÃ‡Ã•ES DE IMPRESSORAS - CONTROL DE IMPRESSORAS
+Arquivo gerado automaticamente. Registra todas as alteraÃ§Ãµes feitas por usuários.
 ================================================================================
+<<<<<<< HEAD
 
+=======
+>>>>>>> 742a475a0e38884c7e0db13ab7f575e637922213
