@@ -22,7 +22,7 @@ public class PrinterService {
     }
 
     public List<Printer> findAll() {
-        return repository.findAllByOrderByUpdatedAtDesc();
+        return repository.findAllByOrderByCodigoAsc();
     }
 
     public Printer findById(String id) {

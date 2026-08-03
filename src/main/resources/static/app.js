@@ -93,7 +93,11 @@ function render() {
   document.getElementById('emptyState').style.display = filtered.length === 0 ? 'block' : 'none';
   grid.innerHTML = '';
 
-  filtered.forEach(p => {
+  const sorted = filtered.slice().sort((a, b) =>
+    (a.codigo || '').localeCompare(b.codigo || '', 'pt-BR', { numeric: true, sensitivity: 'base' })
+  );
+
+  sorted.forEach(p => {
     const card = document.createElement('div');
     const isOfflineEthernet = p.connectionType !== 'USB' && p.connectivityStatus === 'INDISPONIVEL';
     const replaceFuncionandoBadge = isOfflineEthernet && p.status === 'FUNCIONANDO';
@@ -630,7 +634,6 @@ async function checkAllIps(btn = null) {
     printers = await res.json();
     render();
     renderReport();
-    updateCountdownDisplay();
 
     const online = printers.filter(p => p.connectionType !== 'USB' && p.ip && p.connectivityStatus === 'ONLINE').length;
     const offline = printers.filter(p => p.connectionType !== 'USB' && p.ip && p.connectivityStatus === 'INDISPONIVEL').length;
@@ -638,7 +641,8 @@ async function checkAllIps(btn = null) {
       showToast(`Verificação concluída: 🟢 ${online} online, 🔴 ${offline} indisponível(is)`);
     }
   } catch (e) {
-    if (btn) showToast('Erro ao verificar conectividade das impressoras');
+    console.error('Erro ao verificar conectividade:', e);
+    if (btn) showToast(e.message || 'Erro ao verificar conectividade das impressoras');
   } finally {
     if (btn) {
       btn.disabled = false;
@@ -682,7 +686,7 @@ function renderReport() {
 
   filtered
     .slice()
-    .sort((a, b) => (a.codigo || '').localeCompare(b.codigo || ''))
+    .sort((a, b) => (a.codigo || '').localeCompare(b.codigo || '', 'pt-BR', { numeric: true, sensitivity: 'base' }))
     .forEach(p => {
       const isOfflineEthernet = p.connectionType !== 'USB' && p.connectivityStatus === 'INDISPONIVEL';
       const replaceFuncionandoBadge = isOfflineEthernet && p.status === 'FUNCIONANDO';
@@ -984,58 +988,12 @@ function closeQrModal() {
     appElement.classList.add('hidden');
   }
 
-  updateCountdownDisplay();
-
-  // Relógio de contagem regressiva ao vivo a cada 1 segundo
-  setInterval(() => {
-    if (!loggedUsername || appElement.classList.contains('hidden')) return;
-    updateCountdownDisplay();
-  }, 1000);
-
-  // Sincroniza silenciosamente a cada 10s para manter todos os computadores da empresa com os mesmos dados do servidor
+  // Sincroniza silenciosamente a cada 10s para manter a tela sempre atualizada com os testes do servidor
   setInterval(() => {
     if (loggedUsername && !appElement.classList.contains('hidden')) {
       fetchPrinters();
     }
   }, 10000);
-}
-
-const AUTO_CHECK_INTERVAL_MS = 10 * 60 * 1000;
-
-function getLatestCheckTimestamp() {
-  let maxTs = 0;
-  printers.forEach(p => {
-    if (p.connectionType !== 'USB' && p.lastConnectivityCheck) {
-      const ts = new Date(p.lastConnectivityCheck).getTime();
-      if (ts > maxTs) maxTs = ts;
-    }
-  });
-  return maxTs;
-}
-
-function updateCountdownDisplay() {
-  const el = document.getElementById('updateCountdown');
-  if (!el) return;
-
-  const latestTs = getLatestCheckTimestamp();
-  const now = Date.now();
-
-  let remainingMs = 0;
-  if (latestTs > 0) {
-    const elapsed = now - latestTs;
-    if (elapsed < AUTO_CHECK_INTERVAL_MS) {
-      remainingMs = AUTO_CHECK_INTERVAL_MS - elapsed;
-    } else {
-      remainingMs = 0;
-    }
-  } else {
-    remainingMs = AUTO_CHECK_INTERVAL_MS;
-  }
-
-  const totalSec = Math.max(0, Math.floor(remainingMs / 1000));
-  const m = Math.floor(totalSec / 60).toString().padStart(2, '0');
-  const s = (totalSec % 60).toString().padStart(2, '0');
-  el.textContent = `${m}:${s}`;
 }
 
 window.addEventListener('DOMContentLoaded', init);

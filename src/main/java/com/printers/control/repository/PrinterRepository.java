@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PrinterRepository extends JpaRepository<Printer, String> {
+    List<Printer> findAllByOrderByCodigoAsc();
     List<Printer> findAllByOrderByUpdatedAtDesc();
     List<Printer> findByCodigo(String codigo);
     Optional<Printer> findByCodigoAndStatus(String codigo, Printer.Status status);
