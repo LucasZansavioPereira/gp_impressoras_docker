@@ -18,13 +18,13 @@
   <div class="auth-screen login-screen" id="loginScreen">
     <div class="auth-card">
       <div id="loginLockoutAlert" class="lockout-alert" style="display:none;"></div>
-      <!-- <div class="auth-brand">
-        <div class="brand-icon emoji-logo">🖨️</div>
-        <div>
-          <h1>Bem-vindo</h1>
-          <p>Faça login para acessar o painel de impressoras</p>
+      <div class="auth-brand">
+        <div class="auth-brand-logo-wrap">
+          <img src="grupo-pereira.png" alt="Grupo Pereira" class="auth-brand-img" />
         </div>
-      </div> -->
+        <h1>Grupo Pereira</h1>
+        <p class="auth-subtitle">Gestão de Impressoras</p>
+      </div>
       <div class="form-group">
         <label>Usuário</label>
         <input id="loginUsername" type="text" autocomplete="username" placeholder="Digite seu usuário" />
@@ -34,7 +34,10 @@
         <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Digite sua senha" />
       </div>
       <div class="auth-actions">
-        <button class="btn-primary" id="btnLogin"><i class="ti ti-lock"></i>Entrar</button>
+        <button class="btn-primary" id="btnLogin" style="width:100%;"><i class="ti ti-lock"></i>Entrar</button>
+      </div>
+      <div class="auth-footer">
+        <p>Desenvolvido por <strong>Lucas Zansavio Pereira</strong></p>
       </div>
     </div>
   </div>
