@@ -71,7 +71,10 @@ public class PrinterController {
      * uma por uma manualmente. Impressoras sem IP cadastrado são ignoradas.
      */
     @PostMapping("/verificar-conectividade")
-    public List<Printer> verificarConectividadeTodas() {
+    public List<Printer> verificarConectividadeTodas(@RequestParam(required = false) String location) {
+        if (location != null && !location.isBlank()) {
+            return connectivityService.verificarPorLocalizacao(location);
+        }
         return connectivityService.verificarTodasImpressoras();
     }
 

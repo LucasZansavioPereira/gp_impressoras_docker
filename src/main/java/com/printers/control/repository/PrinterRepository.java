@@ -11,4 +11,5 @@ public interface PrinterRepository extends JpaRepository<Printer, String> {
     List<Printer> findAllByOrderByUpdatedAtDesc();
     List<Printer> findByCodigo(String codigo);
     Optional<Printer> findByCodigoAndStatus(String codigo, Printer.Status status);
+    List<Printer> findBySetorAntigoIgnoreCase(String setorAntigo);
 }

@@ -1,9 +1,13 @@
 const API = '/api/printers';
 const AUTH_API = '/api/auth';
+const LOCATIONS_API = '/api/locations';
 let printers = [];
+let locations = [];
 let currentStatus = '';
 let selectedStatus = 'FUNCIONANDO';
 let loggedUsername = '';
+let currentLocationFilter = '';
+let currentSectorFilter = '';
 
 let appElement;
 let loginScreen;
@@ -39,6 +43,7 @@ async function loadPrinters() {
   try {
     const res = await fetch(API);
     printers = await res.json();
+    await fetchLocations();
     render();
     renderReport();
   } catch (e) {
@@ -46,10 +51,181 @@ async function loadPrinters() {
   }
 }
 
+async function fetchLocations() {
+  try {
+    const res = await fetch(LOCATIONS_API);
+    if (res.ok) {
+      locations = await res.json();
+      populateLocationSelect();
+      renderLocations();
+      renderSidebarLocationStats();
+    }
+  } catch (e) {
+    console.error('Erro ao carregar localizações:', e);
+  }
+}
+
+function populateLocationSelect(selectedValue) {
+  const select = document.getElementById('fSetorAntigo');
+  if (!select) return;
+
+  const currentVal = selectedValue !== undefined ? selectedValue : select.value;
+  select.innerHTML = '<option value="">Selecione uma localização...</option>';
+
+  const set = new Set();
+  locations.forEach(loc => { if (loc.nome) set.add(loc.nome.trim()); });
+  printers.forEach(p => { if (p.setorAntigo) set.add(p.setorAntigo.trim()); });
+
+  const sorted = Array.from(set).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  sorted.forEach(locName => {
+    const opt = document.createElement('option');
+    opt.value = locName;
+    opt.textContent = locName;
+    select.appendChild(opt);
+  });
+
+  if (currentVal && set.has(currentVal)) {
+    select.value = currentVal;
+  } else if (currentVal) {
+    const opt = document.createElement('option');
+    opt.value = currentVal;
+    opt.textContent = currentVal;
+    select.appendChild(opt);
+    select.value = currentVal;
+  }
+}
+
+function openLocationModal() {
+  document.getElementById('fLocationNome').value = '';
+  document.getElementById('locationModalOverlay').classList.add('open');
+  document.getElementById('fLocationNome').focus();
+}
+
+function closeLocationModal() {
+  document.getElementById('locationModalOverlay').classList.remove('open');
+}
+
+async function saveLocation() {
+  const nameInput = document.getElementById('fLocationNome');
+  const nome = nameInput.value.trim();
+
+  if (!nome) {
+    showToast('Informe o nome da localização');
+    return;
+  }
+
+  try {
+    const res = await fetch(LOCATIONS_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.erro || 'Falha ao salvar localização');
+    }
+
+    showToast(`🟢 Local '${nome}' cadastrado com sucesso!`);
+    closeLocationModal();
+    await fetchLocations();
+  } catch (e) {
+    showToast(e.message || 'Erro ao cadastrar local');
+  }
+}
+
+async function deleteLocation(id, name, printerCount = 0) {
+  if (printerCount > 0) {
+    showToast(`⚠️ Não é possível excluir '${name}': possui ${printerCount} impressora(s) cadastrada(s)`);
+    return;
+  }
+
+  if (!confirm(`Deseja realmente excluir a localização '${name}'?`)) {
+    return;
+  }
+
+  try {
+    const res = await fetch(`${LOCATIONS_API}/${id}`, { method: 'DELETE' });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.erro || 'Falha ao excluir localização');
+    }
+    showToast(`Local '${name}' excluído com sucesso`);
+    await fetchLocations();
+    await loadPrinters();
+  } catch (e) {
+    showToast(e.message || 'Erro ao excluir localização');
+  }
+}
+
+function renderLocationSectors(locationName) {
+  const row = document.getElementById('locationSectorsRow');
+  const container = document.getElementById('locationSectorChips');
+  if (!row || !container) return;
+
+  const locPrinters = printers.filter(p => (p.setorAntigo || '').trim().toLowerCase() === locationName.trim().toLowerCase());
+
+  const sectorCounts = {};
+  locPrinters.forEach(p => {
+    const sec = (p.setorNovo || '').trim();
+    if (sec) {
+      sectorCounts[sec] = (sectorCounts[sec] || 0) + 1;
+    }
+  });
+
+  const sectors = Object.keys(sectorCounts).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+  if (sectors.length === 0) {
+    row.style.display = 'none';
+    return;
+  }
+
+  row.style.display = 'flex';
+  container.innerHTML = '';
+
+  const btnAll = document.createElement('button');
+  btnAll.type = 'button';
+  btnAll.className = `chip ${!currentSectorFilter ? 'active' : ''}`;
+  btnAll.textContent = `Todos os Setores (${locPrinters.length})`;
+  btnAll.addEventListener('click', () => {
+    currentSectorFilter = '';
+    render();
+  });
+  container.appendChild(btnAll);
+
+  sectors.forEach(sec => {
+    const count = sectorCounts[sec];
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = `chip ${currentSectorFilter === sec ? 'active' : ''}`;
+    btn.textContent = `${sec} (${count})`;
+    btn.addEventListener('click', () => {
+      currentSectorFilter = currentSectorFilter === sec ? '' : sec;
+      render();
+    });
+    container.appendChild(btn);
+  });
+}
+
 function render() {
+  const locBanner = document.getElementById('locationFilterBanner');
+  const locNameEl = document.getElementById('locationFilterName');
+  if (locBanner && locNameEl) {
+    if (currentLocationFilter) {
+      locBanner.style.display = 'flex';
+      locNameEl.textContent = currentLocationFilter;
+      renderLocationSectors(currentLocationFilter);
+    } else {
+      locBanner.style.display = 'none';
+      currentSectorFilter = '';
+    }
+  }
+
   const search = document.getElementById('search').value.toLowerCase();
   const grid = document.getElementById('grid');
   const filtered = printers.filter(p => {
+    const matchesLocation = !currentLocationFilter || (p.setorAntigo || '').trim().toLowerCase() === currentLocationFilter.trim().toLowerCase();
+    const matchesSector = !currentSectorFilter || (p.setorNovo || '').trim().toLowerCase() === currentSectorFilter.trim().toLowerCase();
     const matchesSearch = !search ||
       (p.codigo || '').toLowerCase().includes(search) ||
       (p.modelo || '').toLowerCase().includes(search) ||
@@ -71,8 +247,17 @@ function render() {
     } else if (currentStatus) {
       matchesStatus = p.status === currentStatus;
     }
-    return matchesSearch && matchesStatus;
+    return matchesLocation && matchesSector && matchesSearch && matchesStatus;
   });
+
+  const isMainViewActive = (document.getElementById('mainView').style.display !== 'none');
+  const targetPrinters = (isMainViewActive && currentLocationFilter)
+    ? printers.filter(p => {
+        const matchesLoc = (p.setorAntigo || '').trim().toLowerCase() === currentLocationFilter.trim().toLowerCase();
+        const matchesSec = !currentSectorFilter || (p.setorNovo || '').trim().toLowerCase() === currentSectorFilter.trim().toLowerCase();
+        return matchesLoc && matchesSec;
+      })
+    : printers;
 
   const elTotal = document.getElementById('statTotal');
   const elIpOnline = document.getElementById('statIpOnline');
@@ -82,13 +267,13 @@ function render() {
   const elBroken = document.getElementById('statBroken');
   const elBackup = document.getElementById('statBackup');
 
-  if (elTotal) elTotal.textContent = printers.length;
-  if (elIpOnline) elIpOnline.textContent = printers.filter(p => p.connectionType !== 'USB' && p.connectivityStatus === 'ONLINE').length;
-  if (elIpOffline) elIpOffline.textContent = printers.filter(p => p.connectionType !== 'USB' && p.connectivityStatus === 'INDISPONIVEL').length;
-  if (elUsb) elUsb.textContent = printers.filter(p => p.connectionType === 'USB').length;
-  if (elMaint) elMaint.textContent = printers.filter(p => p.status === 'MANUTENCAO').length;
-  if (elBroken) elBroken.textContent = printers.filter(p => p.status === 'QUEBRADA').length;
-  if (elBackup) elBackup.textContent = printers.filter(p => p.status === 'BACKUP').length;
+  if (elTotal) elTotal.textContent = targetPrinters.length;
+  if (elIpOnline) elIpOnline.textContent = targetPrinters.filter(p => p.connectionType !== 'USB' && p.connectivityStatus === 'ONLINE').length;
+  if (elIpOffline) elIpOffline.textContent = targetPrinters.filter(p => p.connectionType !== 'USB' && p.connectivityStatus === 'INDISPONIVEL').length;
+  if (elUsb) elUsb.textContent = targetPrinters.filter(p => p.connectionType === 'USB').length;
+  if (elMaint) elMaint.textContent = targetPrinters.filter(p => p.status === 'MANUTENCAO').length;
+  if (elBroken) elBroken.textContent = targetPrinters.filter(p => p.status === 'QUEBRADA').length;
+  if (elBackup) elBackup.textContent = targetPrinters.filter(p => p.status === 'BACKUP').length;
 
   document.getElementById('emptyState').style.display = filtered.length === 0 ? 'block' : 'none';
   grid.innerHTML = '';
@@ -151,7 +336,9 @@ function openModal(p) {
   document.getElementById('fCodigo').value = p ? p.codigo : '';
   document.getElementById('fModelo').value = p ? (p.modelo || '') : '';
   document.getElementById('fProblema').value = p ? (p.problema || '') : '';
-  document.getElementById('fSetorAntigo').value = p ? (p.setorAntigo || '') : '';
+
+  populateLocationSelect(p ? (p.setorAntigo || '') : '');
+
   document.getElementById('fSetorNovo').value = p ? (p.setorNovo || '') : '';
   document.getElementById('fMarcaModelo').value = p ? (p.marcaModelo || '') : '';
   document.getElementById('fIp').value = p ? (p.ip || '') : '';
@@ -348,15 +535,12 @@ async function savePrinter() {
 }
 
 function showUserScreen() {
-  loginScreen.style.display = 'none';
-  userScreen.style.display = 'flex';
-  appElement.classList.add('hidden');
-  editUsernameCurrent.value = loggedUsername || '';
-  editCurrentPassword.value = '';
-  editNewPassword.value = '';
-  newUserUsername.value = '';
-  newUserPassword.value = '';
-  createUserSection.style.display = 'block';
+  if (editUsernameCurrent) editUsernameCurrent.value = loggedUsername || '';
+  if (editCurrentPassword) editCurrentPassword.value = '';
+  if (editNewPassword) editNewPassword.value = '';
+  if (newUserUsername) newUserUsername.value = '';
+  if (newUserPassword) newUserPassword.value = '';
+  if (createUserSection) createUserSection.style.display = 'block';
   loadUsers();
 }
 
@@ -411,7 +595,7 @@ async function deleteUser(username) {
 
 function showAppScreen() {
   loginScreen.style.display = 'none';
-  userScreen.style.display = 'none';
+  if (userScreen) userScreen.style.display = 'none';
   appElement.classList.remove('hidden');
 }
 
@@ -420,12 +604,12 @@ function completeLogin() {
     localStorage.setItem('logged_printer_username', loggedUsername);
   }
   loginScreen.style.display = 'none';
-  userScreen.style.display = 'none';
+  if (userScreen) userScreen.style.display = 'none';
   appElement.classList.remove('hidden');
-  currentUsername.textContent = loggedUsername || '-';
-  editUsernameCurrent.value = loggedUsername || '';
-  loginUsername.value = '';
-  loginPassword.value = '';
+  if (currentUsername) currentUsername.textContent = loggedUsername || '-';
+  if (editUsernameCurrent) editUsernameCurrent.value = loggedUsername || '';
+  if (loginUsername) loginUsername.value = '';
+  if (loginPassword) loginPassword.value = '';
   loadPrinters();
   loadUsers();
 }
@@ -434,7 +618,7 @@ function logout() {
   localStorage.removeItem('logged_printer_username');
   loggedUsername = null;
   appElement.classList.add('hidden');
-  userScreen.style.display = 'none';
+  if (userScreen) userScreen.style.display = 'none';
   loginScreen.style.display = 'flex';
   showToast('Sessão encerrada com sucesso');
 }
@@ -601,23 +785,50 @@ function exportToExcel() {
     return;
   }
 
+  const exportPrinters = currentLocationFilter
+    ? printers.filter(p => {
+        const matchesLoc = (p.setorAntigo || '').trim().toLowerCase() === currentLocationFilter.trim().toLowerCase();
+        const matchesSec = !currentSectorFilter || (p.setorNovo || '').trim().toLowerCase() === currentSectorFilter.trim().toLowerCase();
+        return matchesLoc && matchesSec;
+      })
+    : printers;
+
+  if (!exportPrinters.length) {
+    showToast('Nenhuma impressora no filtro atual para exportar');
+    return;
+  }
+
   const wb = XLSX.utils.book_new();
-  addSheet(wb, 'Todas', printers);
-  addSheet(wb, 'Funcionando', printers.filter(p => p.status === 'FUNCIONANDO'));
-  addSheet(wb, 'Manutenção', printers.filter(p => p.status === 'MANUTENCAO'));
-  addSheet(wb, 'Quebradas', printers.filter(p => p.status === 'QUEBRADA'));
-  addSheet(wb, 'Backup', printers.filter(p => p.status === 'BACKUP'));
+  const mainSheetName = currentLocationFilter ? currentLocationFilter.slice(0, 31) : 'Todas';
+
+  addSheet(wb, mainSheetName, exportPrinters);
+  addSheet(wb, 'Funcionando', exportPrinters.filter(p => p.status === 'FUNCIONANDO'));
+  addSheet(wb, 'Manutenção', exportPrinters.filter(p => p.status === 'MANUTENCAO'));
+  addSheet(wb, 'Quebradas', exportPrinters.filter(p => p.status === 'QUEBRADA'));
+  addSheet(wb, 'Backup', exportPrinters.filter(p => p.status === 'BACKUP'));
 
   const date = new Date().toISOString().slice(0, 10);
-  XLSX.writeFile(wb, `impressoras_${date}.xlsx`);
-  showToast('Planilha exportada com sucesso');
+  const fileNameSuffix = currentLocationFilter ? `_${currentLocationFilter.toLowerCase().replace(/\s+/g, '_')}` : '';
+  XLSX.writeFile(wb, `impressoras${fileNameSuffix}_${date}.xlsx`);
+  showToast(currentLocationFilter ? `Planilha de "${currentLocationFilter}" exportada com sucesso` : 'Planilha exportada com sucesso');
 }
 
 async function checkAllIps(btn = null) {
-  const comIp = printers.filter(p => p.connectionType !== 'USB' && p.ip && p.ip.trim()).length;
+  const targetLocation = currentLocationFilter ? currentLocationFilter.trim() : '';
+
+  const targetPrinters = targetLocation
+    ? printers.filter(p => (p.setorAntigo || '').trim().toLowerCase() === targetLocation.toLowerCase())
+    : printers;
+
+  const comIp = targetPrinters.filter(p => p.connectionType !== 'USB' && p.ip && p.ip.trim()).length;
 
   if (comIp === 0) {
-    if (btn) showToast('Nenhuma impressora com IP cadastrado para verificar');
+    if (btn) {
+      showToast(targetLocation
+        ? `Nenhuma impressora com IP em "${targetLocation}" para verificar`
+        : 'Nenhuma impressora com IP cadastrado para verificar'
+      );
+    }
     return;
   }
 
@@ -629,16 +840,29 @@ async function checkAllIps(btn = null) {
   }
 
   try {
-    const res = await fetch(`${API}/verificar-conectividade`, { method: 'POST' });
+    const url = targetLocation
+      ? `${API}/verificar-conectividade?location=${encodeURIComponent(targetLocation)}`
+      : `${API}/verificar-conectividade`;
+
+    const res = await fetch(url, { method: 'POST' });
     if (!res.ok) throw new Error('Falha ao verificar');
-    printers = await res.json();
+
+    const updatedList = await res.json();
+    const updatedMap = new Map((updatedList || []).map(p => [p.id, p]));
+
+    printers = printers.map(p => updatedMap.get(p.id) || p);
+
     render();
     renderReport();
 
-    const online = printers.filter(p => p.connectionType !== 'USB' && p.ip && p.connectivityStatus === 'ONLINE').length;
-    const offline = printers.filter(p => p.connectionType !== 'USB' && p.ip && p.connectivityStatus === 'INDISPONIVEL').length;
+    const verifiedPrinters = targetLocation
+      ? printers.filter(p => (p.setorAntigo || '').trim().toLowerCase() === targetLocation.toLowerCase())
+      : printers;
+
+    const online = verifiedPrinters.filter(p => p.connectionType !== 'USB' && p.ip && p.connectivityStatus === 'ONLINE').length;
+    const offline = verifiedPrinters.filter(p => p.connectionType !== 'USB' && p.ip && p.connectivityStatus === 'INDISPONIVEL').length;
     if (btn) {
-      showToast(`Verificação concluída: 🟢 ${online} online, 🔴 ${offline} indisponível(is)`);
+      showToast(`Verificação concluída${targetLocation ? ` (${targetLocation})` : ''}: 🟢 ${online} online, 🔴 ${offline} indisponível(is)`);
     }
   } catch (e) {
     console.error('Erro ao verificar conectividade:', e);
@@ -653,10 +877,131 @@ async function checkAllIps(btn = null) {
 
 function switchView(view) {
   document.getElementById('mainView').style.display = view === 'main' ? 'block' : 'none';
+  const locView = document.getElementById('locationsView');
+  if (locView) locView.style.display = view === 'locations' ? 'block' : 'none';
   document.getElementById('reportView').style.display = view === 'report' ? 'block' : 'none';
-  document.getElementById('navPrinters').classList.toggle('active', view === 'main');
-  document.getElementById('navReport').classList.toggle('active', view === 'report');
+  const accView = document.getElementById('accountView');
+  if (accView) accView.style.display = view === 'account' ? 'block' : 'none';
+
+  const sidebarStats = document.getElementById('sidebarStats');
+  if (sidebarStats) {
+    sidebarStats.style.display = 'flex';
+  }
+
+  const navLoc = document.getElementById('navLocations');
+  const navPrin = document.getElementById('navPrinters');
+  const navRep = document.getElementById('navReport');
+  const navAcc = document.getElementById('navAccount');
+
+  if (navLoc) navLoc.classList.toggle('active', view === 'locations');
+  if (navPrin) navPrin.classList.toggle('active', view === 'main');
+  if (navRep) navRep.classList.toggle('active', view === 'report');
+  if (navAcc) navAcc.classList.toggle('active', view === 'account');
+
+  render();
+  if (view === 'locations') renderLocations();
   if (view === 'report') renderReport();
+  if (view === 'account') showUserScreen();
+}
+
+function renderLocations() {
+  const grid = document.getElementById('locationsGrid');
+  const emptyState = document.getElementById('locationsEmptyState');
+  const searchInput = document.getElementById('locationsSearch');
+  if (!grid) return;
+
+  const search = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+  const locationMap = new Map();
+
+  locations.forEach(loc => {
+    locationMap.set(loc.nome.trim().toLowerCase(), {
+      id: loc.id,
+      name: loc.nome.trim(),
+      printers: []
+    });
+  });
+
+  printers.forEach(p => {
+    const rawLoc = (p.setorAntigo || '').trim();
+    if (!rawLoc) return;
+    const key = rawLoc.toLowerCase();
+    if (!locationMap.has(key)) {
+      locationMap.set(key, {
+        id: null,
+        name: rawLoc,
+        printers: []
+      });
+    }
+    locationMap.get(key).printers.push(p);
+  });
+
+  const allGroups = Array.from(locationMap.values()).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  const filtered = allGroups.filter(g => !search || g.name.toLowerCase().includes(search));
+
+  if (emptyState) {
+    emptyState.style.display = filtered.length === 0 ? 'block' : 'none';
+  }
+
+  grid.innerHTML = '';
+
+  filtered.forEach(group => {
+    const groupPrinters = group.printers;
+    const total = groupPrinters.length;
+    const online = groupPrinters.filter(p => p.connectionType !== 'USB' && p.connectivityStatus === 'ONLINE').length;
+    const offline = groupPrinters.filter(p => p.connectionType !== 'USB' && p.connectivityStatus === 'INDISPONIVEL').length;
+    const usb = groupPrinters.filter(p => p.connectionType === 'USB').length;
+    const broken = groupPrinters.filter(p => p.status === 'QUEBRADA').length;
+    const maint = groupPrinters.filter(p => p.status === 'MANUTENCAO').length;
+    const backup = groupPrinters.filter(p => p.status === 'BACKUP').length;
+
+    const sectorsSet = new Set();
+    groupPrinters.forEach(p => { if (p.setorNovo) sectorsSet.add(p.setorNovo.trim()); });
+    const sectorsList = Array.from(sectorsSet).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+    const card = document.createElement('div');
+    card.className = 'location-card';
+    card.innerHTML = `
+      <div class="location-card-header">
+        <div class="location-card-title">
+          <span>${escapeHtml(group.name)}</span>
+        </div>
+      </div>
+      <div class="location-card-stats">
+        <span class="location-stat-item total"><i class="ti ti-printer"></i> ${total} ${total === 1 ? 'impressora' : 'impressoras'}</span>
+        ${online > 0 ? `<span class="location-stat-item online"><i class="ti ti-wifi"></i> ${online} Online</span>` : ''}
+        ${offline > 0 ? `<span class="location-stat-item offline"><i class="ti ti-wifi-off"></i> ${offline} Indisponível</span>` : ''}
+        ${usb > 0 ? `<span class="location-stat-item usb"><i class="ti ti-usb"></i> ${usb} USB</span>` : ''}
+        ${broken > 0 ? `<span class="location-stat-item broken"><i class="ti ti-alert-triangle"></i> ${broken} Quebrada</span>` : ''}
+        ${maint > 0 ? `<span class="location-stat-item maint"><i class="ti ti-tools"></i> ${maint} Manutenção</span>` : ''}
+        ${backup > 0 ? `<span class="location-stat-item backup"><i class="ti ti-box"></i> ${backup} Backup</span>` : ''}
+      </div>
+      <div class="location-card-footer">
+        ${group.id ? `<button type="button" class="btn-delete-location" title="Excluir local"><i class="ti ti-trash"></i>Excluir</button>` : '<span></span>'}
+      </div>
+    `;
+
+    const btnDelete = card.querySelector('.btn-delete-location');
+    if (btnDelete && group.id) {
+      if (total > 0) {
+        btnDelete.title = `Possui ${total} impressora(s) cadastrada(s). Não é possível excluir.`;
+        btnDelete.style.opacity = '0.5';
+      }
+      btnDelete.addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteLocation(group.id, group.name, total);
+      });
+    }
+
+    card.addEventListener('click', () => {
+      currentLocationFilter = group.name;
+      currentSectorFilter = '';
+      switchView('main');
+      render();
+    });
+
+    grid.appendChild(card);
+  });
 }
 
 function renderReport() {
@@ -695,7 +1040,8 @@ function renderReport() {
       tr.innerHTML = `
         <td class="rt-codigo">${escapeHtml(p.codigo)}</td>
         <td class="rt-modelo">${escapeHtml(p.modelo || '-')}</td>
-        <td class="rt-setor">${escapeHtml(p.setorNovo || p.setorAntigo || '-')}</td>
+        <td class="rt-setor">${escapeHtml(p.setorAntigo || '-')}</td>
+        <td class="rt-setor">${escapeHtml(p.setorNovo || '-')}</td>
         <td class="rt-conn-type"><span class="conn-type ${p.connectionType === 'USB' ? 'usb' : 'ethernet'}">${p.connectionType === 'USB' ? 'USB' : 'Ethernet'}</span></td>
         <td>
           ${replaceFuncionandoBadge
@@ -974,9 +1320,54 @@ function closeQrModal() {
     btnLogout.addEventListener('click', logout);
   }
 
-  document.getElementById('navPrinters').addEventListener('click', () => switchView('main'));
+  const btnNewLoc = document.getElementById('btnNewLocation');
+  if (btnNewLoc) btnNewLoc.addEventListener('click', openLocationModal);
+  const btnCloseLocModal = document.getElementById('btnCloseLocationModal');
+  if (btnCloseLocModal) btnCloseLocModal.addEventListener('click', closeLocationModal);
+  const btnCancelLocModal = document.getElementById('btnCancelLocationModal');
+  if (btnCancelLocModal) btnCancelLocModal.addEventListener('click', closeLocationModal);
+  const btnSaveLoc = document.getElementById('btnSaveLocation');
+  if (btnSaveLoc) btnSaveLoc.addEventListener('click', saveLocation);
+
+  const locModalOverlay = document.getElementById('locationModalOverlay');
+  if (locModalOverlay) {
+    locModalOverlay.addEventListener('click', (e) => {
+      if (e.target.id === 'locationModalOverlay') closeLocationModal();
+    });
+  }
+
+  const navLocations = document.getElementById('navLocations');
+  if (navLocations) {
+    navLocations.addEventListener('click', () => switchView('locations'));
+  }
+  const navAccount = document.getElementById('navAccount');
+  if (navAccount) {
+    navAccount.addEventListener('click', () => switchView('account'));
+  }
+  if (userManagementSideButton) {
+    userManagementSideButton.addEventListener('click', () => switchView('account'));
+  }
+  document.getElementById('navPrinters').addEventListener('click', () => {
+    currentLocationFilter = '';
+    switchView('main');
+    render();
+  });
   document.getElementById('navReport').addEventListener('click', () => switchView('report'));
   document.getElementById('reportSearch').addEventListener('input', renderReport);
+
+  const btnClearLoc = document.getElementById('btnClearLocationFilter');
+  if (btnClearLoc) {
+    btnClearLoc.addEventListener('click', () => {
+      currentLocationFilter = '';
+      currentSectorFilter = '';
+      render();
+    });
+  }
+
+  const locSearch = document.getElementById('locationsSearch');
+  if (locSearch) {
+    locSearch.addEventListener('input', renderLocations);
+  }
 
   const savedUsername = localStorage.getItem('logged_printer_username');
   if (savedUsername) {
@@ -984,7 +1375,7 @@ function closeQrModal() {
     completeLogin();
   } else {
     loginScreen.style.display = 'flex';
-    userScreen.style.display = 'none';
+    if (userScreen) userScreen.style.display = 'none';
     appElement.classList.add('hidden');
   }
 

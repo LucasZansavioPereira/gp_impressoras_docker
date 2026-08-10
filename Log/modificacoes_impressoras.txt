@@ -1,4 +1,11 @@
 ================================================================================
 LOG DE MODIFICAÃƒâ€¡Ãƒâ€¢ES DE IMPRESSORAS - CONTROL DE IMPRESSORAS
 Arquivo gerado automaticamente. Registra todas as alteraÃƒÂ§ÃƒÂµes feitas por usuÃ¡rios.
-================================================================================
+================================================================================[10/08/2026 11:53:02] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Administrativo' editada | Alterações: Localização [Planta 2 -> Planta 3]
+[10/08/2026 11:56:57] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Administrativo' editada | Alterações: Localização [Planta 3 -> Planta 2]
+[10/08/2026 11:57:30] [USUÁRIO: lucas] [AÇÃO: CADASTRO] Impressora 'Teste' cadastrada | Modelo: Samsung | Status: FUNCIONANDO | Setor: Administrativo | IP: - | MAC: -
+[10/08/2026 11:59:19] [USUÁRIO: lucas] [AÇÃO: CADASTRO] Impressora 'Administrativo' cadastrada | Modelo: Samsung | Status: FUNCIONANDO | Setor: Administrativo | IP: - | MAC: -
+[10/08/2026 12:21:52] [USUÁRIO: lucas] [AÇÃO: CADASTRO] Impressora 'Expedição' cadastrada | Modelo: Brother | Status: FUNCIONANDO | Setor: Expedição | IP: - | MAC: -
+[10/08/2026 15:14:19] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Administrativo' editada | Alterações: MAC [3c-2a-f4-83-16-0d -> 3c-2a-f4-83-16-00]
+[10/08/2026 15:14:22] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Administrativo' editada | Alterações: MAC [3c-2a-f4-83-16-00 -> 3c-2a-f4-83-16-0d]
+[10/08/2026 15:14:24] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Administrativo' editada | Alterações: Nenhum campo alterado.

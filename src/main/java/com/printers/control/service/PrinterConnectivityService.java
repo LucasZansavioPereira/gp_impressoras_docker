@@ -61,8 +61,7 @@ public class PrinterConnectivityService {
      * e persiste o resultado de cada uma. Usado tanto pelo scheduler quanto por
      * uma checagem manual disparada pelo usuário.
      */
-    public List<Printer> verificarTodasImpressoras() {
-        List<Printer> printers = repository.findAll();
+    public List<Printer> verificarListaImpressoras(List<Printer> printers) {
         log.info("Iniciando verificação de conectividade de {} impressora(s)", printers.size());
 
         List<CompletableFuture<Printer>> futures = printers.stream()
@@ -72,6 +71,17 @@ public class PrinterConnectivityService {
         return futures.stream()
                 .map(CompletableFuture::join)
                 .collect(Collectors.toList());
+    }
+
+    public List<Printer> verificarTodasImpressoras() {
+        return verificarListaImpressoras(repository.findAll());
+    }
+
+    public List<Printer> verificarPorLocalizacao(String location) {
+        if (location == null || location.isBlank()) {
+            return verificarTodasImpressoras();
+        }
+        return verificarListaImpressoras(repository.findBySetorAntigoIgnoreCase(location.trim()));
     }
 
     /**
@@ -96,23 +106,6 @@ public class PrinterConnectivityService {
         Printer.ConnectivityStatus novoStatus = online
                 ? Printer.ConnectivityStatus.ONLINE
                 : Printer.ConnectivityStatus.INDISPONIVEL;
-
-        // If we have a MAC configured in the 'marcaModelo' field (UI shows it as Endereço MAC),
-        // try to verify the IP -> MAC mapping and detect mismatches.
-        String expectedMac = (printer.getMarcaModelo() != null) ? printer.getMarcaModelo().trim() : null;
-        if (online && expectedMac != null && !expectedMac.isBlank()) {
-            try {
-                String actualMac = lookupMacForIpWithRetry(ip, 2, 300);
-                if (actualMac != null && !actualMac.isBlank()) {
-                    if (!normalizeMac(actualMac).equals(normalizeMac(expectedMac))) {
-                        log.warn("Divergência de MAC para IP {}: esperado {}, encontrado {}", ip, expectedMac, actualMac);
-                        novoStatus = Printer.ConnectivityStatus.INDISPONIVEL;
-                    }
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }
 
         printer.setConnectivityStatus(novoStatus);
         printer.setLastConnectivityCheck(Instant.now());
