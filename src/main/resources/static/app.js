@@ -70,7 +70,7 @@ function populateLocationSelect(selectedValue) {
   if (!select) return;
 
   const currentVal = selectedValue !== undefined ? selectedValue : select.value;
-  select.innerHTML = '<option value="">Selecione uma localização...</option>';
+  select.innerHTML = '<option value="">-----</option>';
 
   const set = new Set();
   locations.forEach(loc => { if (loc.nome) set.add(loc.nome.trim()); });
