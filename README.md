@@ -44,6 +44,27 @@ O **PrinterGen** foi desenvolvido com o objetivo de centralizar, organizar e aut
 
 ---
 
+## ⚙️ Regras de Negócio e Validações
+
+Para garantir a integridade dos dados e o correto funcionamento do monitoramento de rede, o sistema aplica regras estritas durante o cadastro e atualização das impressoras:
+
+### Unicidade Rigorosa (Prevenção de Duplicatas)
+O sistema bloqueia o cadastro de equipamentos duplicados. Uma impressora é considerada "exatamente igual" a outra (e portanto, bloqueada) se todos os 4 campos a seguir forem idênticos simultaneamente:
+1. **Nome / Código**
+2. **Modelo**
+3. **Status Operacional** (Normal, Backup, etc)
+4. **Localização Antiga / Setor**
+
+*Nota:* É permitido ter impressoras com o mesmo nome e modelo, desde que estejam alocadas em setores diferentes ou tenham status diferentes (ex: uma em produção e outra reserva no estoque).
+
+### Resolução de Conflito de IP (Tie-Breaker Lógico)
+É um cenário comum na empresa possuir **duas impressoras compartilhando o mesmo endereço IP** (uma ativa em produção e outra idêntica desligada no estoque como *Backup*). Como o PING não consegue diferenciar fisicamente qual das duas está respondendo, o sistema usa a seguinte regra de "Desempate Lógico":
+- Se o IP responder ao PING, o sistema busca todas as impressoras cadastradas com aquele IP.
+- Ele dará o status de **IP Online** prioritariamente para a impressora que estiver marcada com o status físico **"Funcionando/Normal"**.
+- As demais impressoras (ex: a de Backup) ficarão como **Indisponível**, evitando falsos positivos e confusão para a equipe de suporte.
+
+---
+
 ## 🛠️ Tecnologias Utilizadas
 
 ### **Backend**

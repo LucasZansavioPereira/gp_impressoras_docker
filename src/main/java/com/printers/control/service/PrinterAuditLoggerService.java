@@ -36,10 +36,11 @@ public class PrinterAuditLoggerService {
             }
             if (!Files.exists(LOG_FILE)) {
                 Files.createFile(LOG_FILE);
-                writeLine("================================================================================");
-                writeLine("LOG DE MODIFICAÇÕES DE IMPRESSORAS - CONTROLE DE IMPRESSORAS");
-                writeLine("Arquivo gerado automaticamente. Registra todas as alterações feitas por usuários.");
-                writeLine("================================================================================\n");
+                writeLine("===========================================================================================");
+                writeLine("LOG DE MODIFICAÇÕES DE IMPRESSORAS — CONTROLE DE IMPRESSORAS");
+                writeLine("");
+                writeLine("Arquivo gerado automaticamente para registrar todas as alterações realizadas pelos usuários.");
+                writeLine("============================================================================================\n");
             }
         } catch (IOException e) {
             log.error("Erro ao inicializar arquivo de log de auditoria: {}", e.getMessage(), e);

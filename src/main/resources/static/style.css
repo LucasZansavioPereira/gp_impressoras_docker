@@ -295,9 +295,13 @@ body{
 .chip:hover{border-color:var(--primary);}
 .chip.active{background:var(--primary);color:#fff;border-color:var(--primary);}
 .chip-online{display:inline-flex;align-items:center;gap:5px;}
-.chip-online.active{background:var(--ok);color:#fff;border-color:var(--ok);}
+.chip-online.active{background:var(--ok-bg);color:var(--ok);border-color:var(--ok);}
 .chip-offline{display:inline-flex;align-items:center;gap:5px;}
-.chip-offline.active{background:var(--broken);color:#fff;border-color:var(--broken);}
+.chip-offline.active{background:var(--broken-bg);color:var(--broken);border-color:var(--broken);}
+.chip-usb.active{background:var(--bg);color:var(--text);border-color:var(--border);}
+.chip-maint.active{background:var(--maint-bg);color:var(--maint);border-color:var(--maint);}
+.chip-broken.active{background:var(--broken-bg);color:var(--broken);border-color:var(--broken);}
+.chip-backup.active{background:var(--backup-bg);color:var(--backup);border-color:var(--backup);}
 
 .btn-primary,
 .btn-secondary,
