@@ -576,7 +576,9 @@ function renderUserList(users) {
             <div class="user-list-actions">
               ${isCurrent
                 ? '<span class="user-list-current"><i class="ti ti-user-check"></i> Você</span>'
-                : `<button type="button" class="btn-danger-small user-delete-btn" title="Excluir usuário"><i class="ti ti-trash"></i>Excluir</button>`
+                : user.isDefaultUser
+                  ? '<span class="user-list-current" style="color:var(--text-muted);"><i class="ti ti-lock"></i> Padrão</span>'
+                  : `<button type="button" class="btn-danger-small user-delete-btn" title="Excluir usuário"><i class="ti ti-trash"></i>Excluir</button>`
               }
             </div>
           </div>
@@ -611,15 +613,22 @@ function showAppScreen() {
   appElement.classList.remove('hidden');
 }
 
-function completeLogin() {
+function completeLogin(data = {}) {
   if (loggedUsername) {
     localStorage.setItem('logged_printer_username', loggedUsername);
+    if (data.isDefaultUser !== undefined) {
+      localStorage.setItem('logged_printer_is_default', data.isDefaultUser);
+    }
   }
   loginScreen.style.display = 'none';
   if (userScreen) userScreen.style.display = 'none';
   appElement.classList.remove('hidden');
   if (currentUsername) currentUsername.textContent = loggedUsername || '-';
-  if (editUsernameCurrent) editUsernameCurrent.value = loggedUsername || '';
+  if (editUsernameCurrent) {
+    editUsernameCurrent.value = loggedUsername || '';
+    const isDefault = localStorage.getItem('logged_printer_is_default') === 'true';
+    editUsernameCurrent.disabled = !isDefault;
+  }
   const elAvatar = document.getElementById('accountAvatarLetter');
   if (elAvatar) elAvatar.textContent = (loggedUsername || 'U').charAt(0).toUpperCase();
   if (loginUsername) loginUsername.value = '';
@@ -630,6 +639,7 @@ function completeLogin() {
 
 function logout() {
   localStorage.removeItem('logged_printer_username');
+  localStorage.removeItem('logged_printer_is_default');
   loggedUsername = null;
   appElement.classList.add('hidden');
   if (userScreen) userScreen.style.display = 'none';
@@ -669,7 +679,7 @@ function checkLoginLockout() {
 
     if (alertEl) {
       alertEl.style.display = 'flex';
-      alertEl.innerHTML = `<i class="ti ti-lock"></i> Acesso bloqueado por 10 min após 3 tentativas incorretas. Tente em <strong>&nbsp;${timeStr}</strong>.`;
+      alertEl.innerHTML = `<i class="ti ti-lock" style="font-size: 1.5rem; flex-shrink: 0;"></i> <div style="flex: 1; text-align: center;">Acesso bloqueado temporariamente.<br>Tente em <strong>${timeStr}</strong></div>`;
     }
     if (btnLogin) btnLogin.disabled = true;
 
@@ -743,7 +753,7 @@ async function login() {
     const data = await res.json();
     loggedUsername = data.username;
     clearLoginLockout();
-    completeLogin();
+    completeLogin(data);
   } catch (e) {
     showToast(e.message);
   }
@@ -1114,13 +1124,14 @@ function init() {
   document.getElementById('btnSaveUser').addEventListener('click', async () => {
     const currentPassword = editCurrentPassword.value.trim();
     const newPassword = editNewPassword.value.trim();
+    const newUsername = editUsernameCurrent.value.trim();
 
     if (!currentPassword) {
       showToast('Digite a senha atual para salvar alterações');
       return;
     }
-    if (!newPassword) {
-      showToast('Digite uma nova senha');
+    if (!newPassword && (!newUsername || newUsername === loggedUsername)) {
+      showToast('Nenhuma alteração para salvar');
       return;
     }
 
@@ -1128,19 +1139,16 @@ function init() {
       const res = await fetch(`${AUTH_API}/users/${encodeURIComponent(loggedUsername)}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ currentPassword, newPassword })
+        body: JSON.stringify({ currentPassword, newPassword, newUsername })
       });
       if (!res.ok) {
         const error = await res.json();
         throw new Error(error.erro || 'Falha ao salvar alterações');
       }
-      const data = await res.json();
-      loggedUsername = data.username;
-      currentUsername.textContent = loggedUsername;
-      editUsernameCurrent.value = loggedUsername;
-      editCurrentPassword.value = '';
-      editNewPassword.value = '';
-      showToast('Alterações salvas com sucesso');
+      showToast('Alterações salvas! Por segurança, faça login novamente.');
+      setTimeout(() => {
+        logout();
+      }, 1500);
     } catch (e) {
       showToast(e.message);
     }

@@ -9,6 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+
 @Service
 public class UserService {
 
@@ -22,6 +25,25 @@ public class UserService {
 
     public UserService(UserRepository repository) {
         this.repository = repository;
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void initDefaultUser() {
+        Optional<User> defaultUser = repository.findByIsDefaultUserTrue();
+        if (defaultUser.isEmpty()) {
+            Optional<User> admin = repository.findByUsername("admin");
+            if (admin.isPresent()) {
+                User u = admin.get();
+                u.setDefaultUser(true);
+                repository.save(u);
+            } else {
+                User newUser = new User();
+                newUser.setUsername("admin");
+                newUser.setPassword(passwordEncoder.encode("admin"));
+                newUser.setDefaultUser(true);
+                repository.save(newUser);
+            }
+        }
     }
 
     public Optional<User> findByUsername(String username) {
@@ -96,6 +118,9 @@ public class UserService {
 
         boolean changed = false;
         if (newUsername != null && !newUsername.isBlank() && !newUsername.equals(currentUsername)) {
+            if (!user.isDefaultUser()) {
+                throw new IllegalArgumentException("Apenas o usuário padrão pode alterar o nome de usuário.");
+            }
             if (repository.existsByUsername(newUsername)) {
                 throw new IllegalArgumentException("Nome de usuário já existe");
             }
@@ -116,6 +141,9 @@ public class UserService {
     public void deleteUser(String username) {
         User user = repository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+        if (user.isDefaultUser()) {
+            throw new IllegalArgumentException("O usuário padrão não pode ser excluído.");
+        }
         repository.delete(user);
     }
 

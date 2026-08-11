@@ -1,12 +1,12 @@
-# 🖨️ Sistema de Gestão e Controle de Impressoras — Laticínios Carolina
+# 🖨️ Sistema de Gestão e Controle de Impressoras — Grupo Pereira
 
-Sistema corporativo para controle centralizado de inventário, monitoramento de rede e gestão do parque de impressoras da **Laticínios Carolina**.
+Sistema corporativo para controle centralizado de inventário, monitoramento de rede e gestão do parque de impressoras do **Grupo Pereira**.
 
 ---
 
 ## 🎯 Finalidade do Projeto
 
-O **PrinterGen** foi desenvolvido com o objetivo de centralizar, organizar e automatizar o controle de todos os equipamentos de impressão distribuídos entre as diferentes plantas e setores da **Laticínios Carolina**.
+O **PrinterGen** foi desenvolvido com o objetivo de centralizar, organizar e automatizar o controle de todos os equipamentos de impressão distribuídos entre as diferentes plantas e setores do **Grupo Pereira**.
 
 ### Principais Objetivos:
 - **Monitoramento Ativo de Conectividade:** Identificar instantaneamente quais impressoras de rede estão ativas (`IP Online`) ou sem comunicação (`IP Offline`).
@@ -54,9 +54,44 @@ O **PrinterGen** foi desenvolvido com o objetivo de centralizar, organizar e aut
 - **Apache POI** (Geração de relatórios em Excel)
 
 ### **Frontend**
-- **HTML5 & CSS3 Vanilla** (Tema escuro corporativo personalizado para a **Laticínios Carolina**)
+- **HTML5 & CSS3 Vanilla** (Tema escuro corporativo personalizado para a **Grupo Pereira**)
 - **JavaScript (ES6+)** (Arquitetura SPA assíncrona com `fetch` API)
 - **Tabler Icons** (Conjunto de ícones vetoriais da interface)
+
+---
+
+## 🏃 Como Executar o Projeto
+
+### Pré-requisitos:
+- **Java 17** (JDK) ou superior instalado.
+- **Maven** instalado (ou use a IDE de sua preferência como IntelliJ, Eclipse, VS Code).
+
+### Passo a passo para rodar localmente:
+1. Clone este repositório para o seu computador.
+2. Abra um terminal na pasta raiz do projeto.
+3. Para iniciar a aplicação, execute o comando Maven:
+   ```bash
+   mvn spring-boot:run
+   ```
+4. Aguarde a mensagem informando que a aplicação iniciou corretamente (ex: `Started PrinterControlApplication`).
+5. Abra o seu navegador e acesse:
+   ```text
+   http://localhost:5080
+   ```
+
+---
+
+## 🔑 Primeiro Acesso
+
+Ao rodar a aplicação em um banco de dados novo ou vazio pela primeira vez, o sistema não terá nenhum usuário cadastrado. Para evitar que você fique "trancado" para fora, o sistema cria automaticamente um usuário padrão administrador:
+
+- **Usuário:** `admin`
+- **Senha:** `admin`
+
+### 🛡️ Regras do Usuário Padrão
+1. **Segurança:** Recomenda-se alterar a senha assim que fizer o primeiro login.
+2. **Edição Exclusiva:** Diferente dos demais usuários, o "usuário padrão" pode ter o seu **nome de usuário alterado** via interface. Caso prefira usar outro nome de login em vez de "admin", você tem liberdade para trocar.
+3. **Exclusão Bloqueada:** O usuário padrão é protegido pelo sistema e **nunca pode ser excluído**. Isso garante que sempre haverá pelo menos um administrador com acesso ao sistema.
 
 ---
 
@@ -89,8 +124,5 @@ PrinterGen/
 ---
 
 ## 👤 Autoria e Responsabilidade
-<<<<<<< HEAD
-Projeto desenvolvido por Lucas Zansavio Pereira para atendimento exclusivo às demandas de TI e infraestrutura da Laticínios Carolina.
-=======
-Projeto desenvolvido por Lucas Zansavio Pereira para atendimento exclusivo às demandas de TI e infraestrutura da Laticínios Carolina.
->>>>>>> 742a475a0e38884c7e0db13ab7f575e637922213
+
+Projeto desenvolvido por **Lucas Zansavio Pereira** para atendimento exclusivo às demandas de TI e infraestrutura do Grupo Pereira.

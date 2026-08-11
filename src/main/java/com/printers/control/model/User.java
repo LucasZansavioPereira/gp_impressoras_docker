@@ -16,6 +16,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean isDefaultUser = false;
+
     public String getId() {
         return id;
     }
@@ -38,5 +41,13 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isDefaultUser() {
+        return isDefaultUser;
+    }
+
+    public void setDefaultUser(boolean defaultUser) {
+        isDefaultUser = defaultUser;
     }
 }
