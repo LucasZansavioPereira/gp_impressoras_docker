@@ -45,7 +45,7 @@ public class PrinterService {
         if (printer.getModelo() == null || printer.getModelo().isBlank()) {
             throw new IllegalArgumentException("O modelo da impressora é obrigatório");
         }
-        validateUniqueCodigoStatus(printer.getCodigo(), printer.getStatus(), printer.getModelo(), null);
+        validateUniqueCodigoStatus(printer.getCodigo(), printer.getStatus(), printer.getModelo(), printer.getSetorAntigo(), null);
         if (printer.getConnectionType() == null) {
             printer.setConnectionType(Printer.ConnectionType.ETHERNET);
         }
@@ -83,6 +83,7 @@ public class PrinterService {
         String finalCodigo = changes.getCodigo() != null ? changes.getCodigo() : existing.getCodigo();
         Printer.Status finalStatus = changes.getStatus() != null ? changes.getStatus() : existing.getStatus();
         String finalModelo = changes.getModelo() != null ? changes.getModelo() : existing.getModelo();
+        String finalSetorAntigo = changes.getSetorAntigo() != null ? changes.getSetorAntigo() : existing.getSetorAntigo();
         Printer.ConnectionType finalConnType = changes.getConnectionType() != null ? changes.getConnectionType() : existing.getConnectionType();
         String finalIp = changes.getIp() != null ? changes.getIp() : existing.getIp();
         String finalMac = changes.getMarcaModelo() != null ? changes.getMarcaModelo() : existing.getMarcaModelo();
@@ -90,7 +91,7 @@ public class PrinterService {
         if (finalModelo == null || finalModelo.isBlank()) {
             throw new IllegalArgumentException("O modelo da impressora é obrigatório");
         }
-        validateUniqueCodigoStatus(finalCodigo, finalStatus, finalModelo, id);
+        validateUniqueCodigoStatus(finalCodigo, finalStatus, finalModelo, finalSetorAntigo, id);
 
         existing.setCodigo(finalCodigo);
         existing.setStatus(finalStatus);
@@ -134,7 +135,7 @@ public class PrinterService {
         }
     }
 
-    private void validateUniqueCodigoStatus(String codigo, Printer.Status status, String modelo, String currentId) {
+    private void validateUniqueCodigoStatus(String codigo, Printer.Status status, String modelo, String setorAntigo, String currentId) {
         if (status == Printer.Status.BACKUP) {
             Optional<Printer> backupWithCodigo = repository.findByCodigoAndStatus(codigo, Printer.Status.BACKUP);
             if (backupWithCodigo.isPresent() && (currentId == null || !backupWithCodigo.get().getId().equals(currentId))) {
@@ -149,10 +150,11 @@ public class PrinterService {
 
         boolean duplicateModelo = sameCodeSameStatus.stream()
                 .anyMatch(p -> p.getModelo() != null && p.getModelo().equalsIgnoreCase(modelo)
+                        && (p.getSetorAntigo() == null ? setorAntigo == null : p.getSetorAntigo().equalsIgnoreCase(setorAntigo))
                         && (currentId == null || !p.getId().equals(currentId)));
 
         if (duplicateModelo) {
-            throw new IllegalArgumentException("Já existe uma impressora com mesmo nome, status e modelo.");
+            throw new IllegalArgumentException("Já existe uma impressora com mesmo nome, status, modelo e localização.");
         }
     }
 

@@ -100,7 +100,7 @@
       </nav>
 
       <div class="sidebar-footer">
-        <p>Lucas Zansavio Pereira</p>
+        <p>Desenvolvido por <strong>Lucas Zansavio Pereira</strong></p>
       </div>
     </aside>
 
@@ -158,7 +158,7 @@
         <header class="report-header">
           <div>
             <h2>Locais</h2>
-            <p class="report-subtitle">Gerencie as filiais e selecione uma localização para visualizar as impressoras</p>
+            <p class="report-subtitle">-----</p>
           </div>
           <div style="display:flex; align-items:center; gap:12px; flex-shrink:0;">
             <div class="search-wrap" style="width: 240px;">
@@ -239,28 +239,28 @@
       </section>
 
       <section id="accountView" class="view" style="display:none;">
-        <header class="report-header">
-          <div>
-            <h2>Minha Conta & Usuários</h2>
-            <p class="report-subtitle">Gerencie suas credenciais de acesso e contas de usuários do sistema</p>
+        <header class="report-header" style="align-items:center;">
+          <div style="display:flex; align-items:center; gap:1.25rem;">
+            <div class="account-avatar" id="accountAvatarLetter">U</div>
+            <div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <h2 style="margin:0;" id="currentUsername">administrador</h2>
+                <span class="user-list-current"><i class="ti ti-check"></i> Sessão ativa</span>
+              </div>
+              <p class="report-subtitle" style="margin:4px 0 0;">Gerencie suas credenciais de acesso e contas de usuários do sistema</p>
+            </div>
           </div>
           <div>
             <button class="btn-danger-small" id="btnLogout" style="height:40px; padding:0 16px; border-radius:12px; font-weight:600;"><i class="ti ti-logout"></i>Sair da conta</button>
           </div>
         </header>
 
-        <div class="user-panel-grid">
-          <!-- Bloco 1: Conta Atual -->
-          <div class="user-panel user-panel-account">
-            <div class="panel-header">
-              <h2>Conta atual</h2>
-            </div>
-            <div class="user-info">
-              <p class="user-label">Usuário atual</p>
-              <h3 id="currentUsername" class="user-name">administrador</h3>
-            </div>
+        <div class="account-dashboard-grid">
+          <!-- Coluna Esquerda: Alterar Senha (ocupa 2 linhas) -->
+          <div class="account-card" style="grid-row: span 2;">
+            <div class="account-section-title"><i class="ti ti-key"></i> Alterar senha</div>
             <div class="form-group">
-              <label>Nome de usuário atual</label>
+              <label>Nome de usuário</label>
               <input id="editUsernameCurrent" type="text" disabled />
             </div>
             <div class="form-group">
@@ -269,36 +269,30 @@
             </div>
             <div class="form-group">
               <label>Nova senha</label>
-              <input id="editNewPassword" type="password" placeholder="Digite nova senha" />
+              <input id="editNewPassword" type="password" placeholder="Digite a nova senha" />
             </div>
-            <div class="auth-actions auth-actions-vertical">
-              <button class="btn-primary" id="btnSaveUser"><i class="ti ti-check"></i>Salvar alterações</button>
-            </div>
+            <button class="btn-primary" id="btnSaveUser" style="width:100%; margin-top:auto;"><i class="ti ti-check"></i>Salvar alterações</button>
           </div>
 
-          <!-- Bloco 2: Criar Conta -->
-          <div class="user-panel user-panel-create" id="createUserSection">
-            <div class="panel-header">
-              <h2>Criar conta</h2>
+          <!-- Coluna Direita Linha 1: Criar Usuário -->
+          <div class="account-card" id="createUserSection">
+            <div class="account-section-title"><i class="ti ti-user-plus"></i> Criar novo usuário</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+              <div class="form-group">
+                <label>Usuário</label>
+                <input id="newUserUsername" type="text" placeholder="Nome de usuário" />
+              </div>
+              <div class="form-group">
+                <label>Senha</label>
+                <input id="newUserPassword" type="password" placeholder="Senha inicial" />
+              </div>
             </div>
-            <div class="form-group">
-              <label>Novo usuário</label>
-              <input id="newUserUsername" type="text" placeholder="Digite o usuário" />
-            </div>
-            <div class="form-group">
-              <label>Nova senha</label>
-              <input id="newUserPassword" type="password" placeholder="Digite a senha" />
-            </div>
-            <div class="auth-actions auth-actions-vertical">
-              <button class="btn-secondary" id="btnCreateUser"><i class="ti ti-user-plus"></i>Criar novo usuário</button>
-            </div>
+            <button class="btn-secondary" id="btnCreateUser" style="width:100%;"><i class="ti ti-user-plus"></i>Cadastrar usuário</button>
           </div>
 
-          <!-- Bloco 3: Usuários Criados -->
-          <div class="user-panel user-panel-list">
-            <div class="panel-header">
-              <h2>Usuários criados</h2>
-            </div>
+          <!-- Coluna Direita Linha 2: Lista de Usuários -->
+          <div class="account-card">
+            <div class="account-section-title"><i class="ti ti-users"></i> Usuários do sistema</div>
             <div id="userList" class="user-list"></div>
           </div>
         </div>

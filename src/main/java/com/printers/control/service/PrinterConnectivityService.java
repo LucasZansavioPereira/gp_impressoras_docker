@@ -64,13 +64,74 @@ public class PrinterConnectivityService {
     public List<Printer> verificarListaImpressoras(List<Printer> printers) {
         log.info("Iniciando verificação de conectividade de {} impressora(s)", printers.size());
 
-        List<CompletableFuture<Printer>> futures = printers.stream()
-                .map(printer -> CompletableFuture.supplyAsync(() -> verificarImpressora(printer), executor))
+        List<String> ipsToCheck = printers.stream()
+                .filter(p -> p.getConnectionType() != Printer.ConnectionType.USB)
+                .map(Printer::getIp)
+                .filter(ip -> ip != null && !ip.isBlank())
+                .distinct()
                 .collect(Collectors.toList());
 
-        return futures.stream()
-                .map(CompletableFuture::join)
+        List<CompletableFuture<Void>> futures = ipsToCheck.stream()
+                .map(ip -> CompletableFuture.runAsync(() -> {
+                    boolean online = testarConectividade(ip);
+                    resolveIpGroupStatus(ip, online);
+                }, executor))
                 .collect(Collectors.toList());
+
+        futures.forEach(CompletableFuture::join);
+
+        printers.stream()
+                .filter(p -> p.getConnectionType() == Printer.ConnectionType.USB)
+                .forEach(p -> {
+                    p.setConnectivityStatus(Printer.ConnectivityStatus.NAO_VERIFICADO);
+                    p.setLastConnectivityCheck(Instant.now());
+                    repository.save(p);
+                });
+
+        return printers.stream()
+                .map(p -> repository.findById(p.getId()).orElse(p))
+                .collect(Collectors.toList());
+    }
+
+    private void resolveIpGroupStatus(String ip, boolean isOnline) {
+        List<Printer> printers = repository.findByIp(ip);
+        if (printers.isEmpty()) return;
+
+        if (!isOnline) {
+            for (Printer p : printers) {
+                p.setConnectivityStatus(Printer.ConnectivityStatus.INDISPONIVEL);
+                p.setLastConnectivityCheck(Instant.now());
+                repository.save(p);
+            }
+            return;
+        }
+
+        if (printers.size() == 1) {
+            Printer p = printers.get(0);
+            p.setConnectivityStatus(Printer.ConnectivityStatus.ONLINE);
+            p.setLastConnectivityCheck(Instant.now());
+            repository.save(p);
+            return;
+        }
+
+        List<Printer> funcionando = printers.stream().filter(p -> p.getStatus() == Printer.Status.FUNCIONANDO).toList();
+        List<Printer> winners = funcionando.isEmpty() 
+            ? printers.stream().filter(p -> p.getStatus() == Printer.Status.BACKUP).toList()
+            : funcionando;
+            
+        if (winners.isEmpty()) {
+            winners = List.of(printers.get(0));
+        }
+
+        for (Printer p : printers) {
+            if (winners.contains(p)) {
+                p.setConnectivityStatus(Printer.ConnectivityStatus.ONLINE);
+            } else {
+                p.setConnectivityStatus(Printer.ConnectivityStatus.INDISPONIVEL);
+            }
+            p.setLastConnectivityCheck(Instant.now());
+            repository.save(p);
+        }
     }
 
     public List<Printer> verificarTodasImpressoras() {
@@ -90,7 +151,6 @@ public class PrinterConnectivityService {
     public Printer verificarImpressora(Printer printer) {
         String ip = printer.getIp();
 
-        // If printer is USB, skip network checks and mark as not-verified
         if (printer.getConnectionType() == Printer.ConnectionType.USB) {
             printer.setConnectivityStatus(Printer.ConnectivityStatus.NAO_VERIFICADO);
             printer.setLastConnectivityCheck(Instant.now());
@@ -98,81 +158,14 @@ public class PrinterConnectivityService {
         }
 
         if (ip == null || ip.isBlank()) {
-            // Sem IP cadastrado: não há o que testar, não altera o status atual.
             return printer;
         }
 
         boolean online = testarConectividade(ip);
-        Printer.ConnectivityStatus novoStatus = online
-                ? Printer.ConnectivityStatus.ONLINE
-                : Printer.ConnectivityStatus.INDISPONIVEL;
-
-        printer.setConnectivityStatus(novoStatus);
-        printer.setLastConnectivityCheck(Instant.now());
-        return repository.save(printer);
+        resolveIpGroupStatus(ip, online);
+        return repository.findById(printer.getId()).orElse(printer);
     }
 
-    private String normalizeMac(String mac) {
-        if (mac == null) return "";
-        return mac.replaceAll("[^0-9A-Fa-f]", "").toLowerCase();
-    }
-
-    private String lookupMacForIpWithRetry(String ip, int attempts, long waitMs) throws InterruptedException {
-        for (int i = 0; i < attempts; i++) {
-            String mac = lookupMacForIp(ip);
-            if (mac != null && !mac.isBlank()) return mac;
-            Thread.sleep(waitMs);
-        }
-        return null;
-    }
-
-    private String lookupMacForIp(String ip) {
-        String os = System.getProperty("os.name").toLowerCase();
-        if (os.contains("linux")) {
-            return lookupMacFromProcArp(ip);
-        } else if (os.contains("windows")) {
-            return lookupMacFromArpA(ip);
-        } else {
-            // Try generic arp -a fallback
-            return lookupMacFromArpA(ip);
-        }
-    }
-
-    private String lookupMacFromProcArp(String ip) {
-        try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.FileReader("/proc/net/arp"))) {
-            String line;
-            br.readLine(); // header
-            while ((line = br.readLine()) != null) {
-                String[] parts = line.trim().split("\\s+");
-                if (parts.length >= 4 && parts[0].equals(ip)) {
-                    String mac = parts[3];
-                    if (!mac.equals("00:00:00:00:00:00")) return mac;
-                }
-            }
-        } catch (Exception e) {
-            log.debug("Erro lendo /proc/net/arp: {}", e.getMessage());
-        }
-        return null;
-    }
-
-    private String lookupMacFromArpA(String ip) {
-        try {
-            Process p = new ProcessBuilder("arp", "-a").start();
-            try (java.io.BufferedReader br = new java.io.BufferedReader(new java.io.InputStreamReader(p.getInputStream()))) {
-                String line;
-                while ((line = br.readLine()) != null) {
-                    if (line.contains(ip)) {
-                        // Try to extract MAC-like token
-                                java.util.regex.Matcher m = java.util.regex.Pattern.compile("([0-9A-Fa-f]{2}(?:[:-][0-9A-Fa-f]{2}){5})").matcher(line);
-                        if (m.find()) return m.group(1);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.debug("Erro executando arp -a: {}", e.getMessage());
-        }
-        return null;
-    }
 
     /** Verificação manual sob demanda para uma impressora específica (por id). */
     public Printer verificarPorId(String id) {

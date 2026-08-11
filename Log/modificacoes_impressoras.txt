@@ -9,3 +9,42 @@ Arquivo gerado automaticamente. Registra todas as alteraÃƒÂ§ÃƒÂµes feitas por us
 [10/08/2026 15:14:19] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Administrativo' editada | Alterações: MAC [3c-2a-f4-83-16-0d -> 3c-2a-f4-83-16-00]
 [10/08/2026 15:14:22] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Administrativo' editada | Alterações: MAC [3c-2a-f4-83-16-00 -> 3c-2a-f4-83-16-0d]
 [10/08/2026 15:14:24] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Administrativo' editada | Alterações: Nenhum campo alterado.
+[10/08/2026 16:52:28] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Departamento Pessoal' editada | Alterações: Nenhum campo alterado.
+[10/08/2026 16:53:33] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Departamento Pessoal' editada | Alterações: Nenhum campo alterado.
+[10/08/2026 16:53:34] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Departamento Pessoal' editada | Alterações: Nenhum campo alterado.
+[10/08/2026 16:53:35] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Departamento Pessoal' editada | Alterações: Nenhum campo alterado.
+[10/08/2026 16:53:38] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Departamento Pessoal' editada | Alterações: Nenhum campo alterado.
+[10/08/2026 16:54:51] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Departamento Pessoal' editada | Alterações: Nenhum campo alterado.
+[10/08/2026 16:58:10] [USUÁRIO: lucas] [AÇÃO: CADASTRO] Impressora 'Expedição Curitiba' cadastrada | Modelo: Brother | Status: FUNCIONANDO | Setor: Expedição | IP: 192.168.6.7 | MAC: 10-62-e5-60-bb-2c
+[10/08/2026 17:23:55] [USUÁRIO: lucas] [AÇÃO: CADASTRO] Impressora 'Administrativo' cadastrada | Modelo: Brother | Status: FUNCIONANDO | Setor: Administrativo | IP: 192.168.1.36 | MAC: 10-62-e5-60-bb-2c
+[10/08/2026 17:25:36] [USUÁRIO: lucas] [AÇÃO: EXCLUSÃO] Impressora 'Administrativo' (Modelo: Samsung, Setor: Administrativo, IP: -) foi EXCLUÍDA.
+[10/08/2026 17:25:38] [USUÁRIO: lucas] [AÇÃO: EXCLUSÃO] Impressora 'Administrativo' (Modelo: Brother, Setor: Administrativo, IP: 192.168.1.36) foi EXCLUÍDA.
+[10/08/2026 17:25:40] [USUÁRIO: lucas] [AÇÃO: EXCLUSÃO] Impressora 'Expedição' (Modelo: Brother, Setor: Expedição, IP: -) foi EXCLUÍDA.
+[10/08/2026 17:25:43] [USUÁRIO: lucas] [AÇÃO: EXCLUSÃO] Impressora 'Expedição Curitiba' (Modelo: Brother, Setor: Expedição, IP: 192.168.6.7) foi EXCLUÍDA.
+[10/08/2026 17:40:17] [USUÁRIO: lucas] [AÇÃO: EXCLUSÃO] Impressora 'Teste' (Modelo: Samsung, Setor: Administrativo, IP: -) foi EXCLUÍDA.
+[10/08/2026 17:41:29] [USUÁRIO: lucas] [AÇÃO: CADASTRO] Impressora 'Samsung' cadastrada | Modelo: Brother | Status: FUNCIONANDO | Setor: Adm | IP: 192.168.1.40 | MAC: 10-62-e5-60-bb-2c
+[11/08/2026 08:28:58] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Expedição C. F. Antiga' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:29:00] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Expedição C. F. Antiga' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:39:16] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Elevador C.F. Antiga' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:39:18] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Elevador C.F. Antiga' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:39:28] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Departamento Pessoal' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:40:11] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Departamento Pessoal' editada | Alterações: MAC [90:32:4b:88:98:1e -> 10:62:e5:60:bb:2c]
+[11/08/2026 08:40:12] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Departamento Pessoal' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:40:13] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Departamento Pessoal' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:40:13] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Departamento Pessoal' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:40:19] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Controller' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:40:19] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Controller' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:40:21] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Departamento Pessoal' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:40:22] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Departamento Pessoal' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:40:22] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Departamento Pessoal' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:40:27] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Departamento Pessoal' editada | Alterações: Status [MANUTENCAO -> FUNCIONANDO]
+[11/08/2026 08:40:28] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Departamento Pessoal' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:41:34] [USUÁRIO: lucas] [AÇÃO: EXCLUSÃO] Impressora 'Administrativo' (Modelo: Brother DCP-L5602DN, Setor: Administrativo, IP: 192.168.1.36) foi EXCLUÍDA.
+[11/08/2026 08:42:11] [USUÁRIO: lucas] [AÇÃO: CADASTRO] Impressora 'Expedição' cadastrada | Modelo: Brother | Status: FUNCIONANDO | Setor: Expedição | IP: 192.168.1.36 | MAC: 3c-2a-f4-83-16-0d
+[11/08/2026 08:42:46] [USUÁRIO: lucas] [AÇÃO: CADASTRO] Impressora 'Expedição' cadastrada | Modelo: Brother | Status: BACKUP | Setor: Expedição | IP: 192.168.1.36 | MAC: 10:62:e5:60:bb:2c
+[11/08/2026 08:44:09] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Expedição' editada | Alterações: Status [FUNCIONANDO -> MANUTENCAO]
+[11/08/2026 08:44:32] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Expedição' editada | Alterações: Status [MANUTENCAO -> FUNCIONANDO]
+[11/08/2026 08:54:49] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Controller (Carrefour)' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:54:50] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Controller (Carrefour)' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:54:59] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Expedição' editada | Alterações: Nenhum campo alterado.
+[11/08/2026 08:55:07] [USUÁRIO: lucas] [AÇÃO: EDIÇÃO] Impressora 'Expedição' editada | Alterações: Nenhum campo alterado.

@@ -541,6 +541,8 @@ function showUserScreen() {
   if (newUserUsername) newUserUsername.value = '';
   if (newUserPassword) newUserPassword.value = '';
   if (createUserSection) createUserSection.style.display = 'block';
+  const elAvatar = document.getElementById('accountAvatarLetter');
+  if (elAvatar) elAvatar.textContent = (loggedUsername || 'U').charAt(0).toUpperCase();
   loadUsers();
 }
 
@@ -562,14 +564,24 @@ function renderUserList(users) {
   if (!userListElement) return;
   const sorted = (users || []).slice().sort((a, b) => (a.username || '').localeCompare(b.username || ''));
   userListElement.innerHTML = sorted.length
-    ? sorted.map(user => `
-      <div class="user-list-item${user.username === loggedUsername ? ' current' : ''}" data-username="${escapeHtml(user.username)}">
-        <span>${escapeHtml(user.username)}</span>
-        <div class="user-list-actions">
-          ${user.username === loggedUsername ? '<span class="user-list-current">atual</span>' : '<button type="button" class="btn-danger-small user-delete-btn" title="Excluir usuário"><i class="ti ti-trash"></i>Excluir</button>'}
-        </div>
-      </div>
-    `).join('')
+    ? sorted.map(user => {
+        const isCurrent = user.username === loggedUsername;
+        const initial = (user.username || 'U').charAt(0).toUpperCase();
+        return `
+          <div class="user-list-item${isCurrent ? ' current' : ''}" data-username="${escapeHtml(user.username)}">
+            <div class="user-list-user">
+              <div class="user-list-avatar">${initial}</div>
+              <span class="user-list-name">${escapeHtml(user.username)}</span>
+            </div>
+            <div class="user-list-actions">
+              ${isCurrent
+                ? '<span class="user-list-current"><i class="ti ti-user-check"></i> Você</span>'
+                : `<button type="button" class="btn-danger-small user-delete-btn" title="Excluir usuário"><i class="ti ti-trash"></i>Excluir</button>`
+              }
+            </div>
+          </div>
+        `;
+      }).join('')
     : '<div class="empty-list">Nenhum usuário cadastrado</div>';
 }
 
@@ -608,6 +620,8 @@ function completeLogin() {
   appElement.classList.remove('hidden');
   if (currentUsername) currentUsername.textContent = loggedUsername || '-';
   if (editUsernameCurrent) editUsernameCurrent.value = loggedUsername || '';
+  const elAvatar = document.getElementById('accountAvatarLetter');
+  if (elAvatar) elAvatar.textContent = (loggedUsername || 'U').charAt(0).toUpperCase();
   if (loginUsername) loginUsername.value = '';
   if (loginPassword) loginPassword.value = '';
   loadPrinters();
