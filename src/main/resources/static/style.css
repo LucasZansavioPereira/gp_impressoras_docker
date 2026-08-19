@@ -446,6 +446,9 @@ body{
   flex-wrap:wrap;
 }
 .badge{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
   font-size:11px;
   font-weight:600;
   padding:3px 9px;
@@ -849,7 +852,6 @@ body{
   border-radius:999px;
   background:var(--primary-light);
   color:var(--primary);
-  margin-left:8px;
   border:none;
 }
 .conn-type.usb{background:rgba(113,128,150,0.12);color:var(--text-tertiary);}
@@ -1481,7 +1483,152 @@ body{
   gap: 4px;
 }
 
-@media (max-width: 800px){
-  .sidebar{display:none;}
-  .content{padding:1.25rem;}
+/* ==========================================================================
+   Responsividade Mobile (@media max-width: 768px)
+   ========================================================================== */
+.mobile-header {
+  display: none;
+}
+.sidebar-overlay {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* Oculta os itens nativos de rolagem para deixar o layout limpo no mobile */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .app {
+    flex-direction: column;
+  }
+
+  /* Cabeçalho Mobile visível */
+  .mobile-header {
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  .mobile-menu-btn {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mobile-header-brand {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  /* Overlay Escuro */
+  .sidebar-overlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .sidebar-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Sidebar Off-canvas */
+  .sidebar {
+    position: fixed;
+    left: -280px;
+    top: 0;
+    bottom: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 2000;
+    transition: left 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.5);
+  }
+  .sidebar.sidebar-open {
+    left: 0;
+  }
+
+  /* Reorganiza Estatísticas para 2 colunas */
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .stat-card {
+    padding: 10px;
+  }
+
+  /* Ajustes no Conteúdo e Topbar */
+  .content {
+    padding: 1rem;
+    width: 100%;
+  }
+  .topbar {
+    padding: 1rem;
+    margin-bottom: 1.25rem;
+  }
+  .topbar-bottom-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  
+  /* Barra de Filtros */
+  .chips {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    overflow-x: visible;
+  }
+  .topbar-actions {
+    width: 100%;
+  }
+  .topbar-actions .btn-secondary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Ajustes dos Modais */
+  .modal-card, .report-modal-card {
+    max-width: 95% !important;
+    padding: 1.25rem !important;
+  }
+  .modal-header h2 {
+    font-size: 16px;
+  }
+  
+  /* Colapsar os form-rows para ficarem em 1 coluna */
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px;
+  }
+
+  /* Ajustes na Tela da Conta */
+  .account-dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.25rem;
+  }
+  .account-info-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
 }

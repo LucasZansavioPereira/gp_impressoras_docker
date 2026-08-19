@@ -1407,6 +1407,42 @@ function closeQrModal() {
       fetchPrinters();
     }
   }, 10000);
+
+  // ==========================================
+  // Lógica do Menu Mobile (Off-canvas Sidebar)
+  // ==========================================
+  const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+  const sidebarOverlay = document.getElementById('sidebarOverlay');
+  const sidebar = document.querySelector('.sidebar');
+
+  function openSidebar() {
+    sidebar.classList.add('sidebar-open');
+    sidebarOverlay.classList.add('active');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('sidebar-open');
+    sidebarOverlay.classList.remove('active');
+  }
+
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', openSidebar);
+  }
+
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', closeSidebar);
+  }
+
+  // Fecha o menu lateral no mobile caso o usuário clique em um item de navegação
+  const navItems = document.querySelectorAll('.side-nav-item');
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      // Verifica se a tela é mobile (largura < 768px)
+      if (window.innerWidth <= 768) {
+        closeSidebar();
+      }
+    });
+  });
 }
 
 window.addEventListener('DOMContentLoaded', init);
