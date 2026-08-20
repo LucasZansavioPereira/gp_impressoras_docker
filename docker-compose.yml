@@ -1,0 +1,20 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: grupopereira-impressoras
+    ports:
+      - "5080:5080"
+    volumes:
+      - db-data:/data
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:h2:file:/data/printers
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.h2.Driver
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=
+    restart: unless-stopped
+
+volumes:
+  db-data:
+    driver: local
