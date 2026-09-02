@@ -88,7 +88,7 @@ COPY --from=extract build/target/extracted/spring-boot-loader/ ./
 COPY --from=extract build/target/extracted/snapshot-dependencies/ ./
 COPY --from=extract build/target/extracted/application/ ./
 
-EXPOSE 5080
+EXPOSE 15800
 
 USER appuser
 
